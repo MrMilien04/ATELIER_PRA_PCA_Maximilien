@@ -270,8 +270,60 @@ Difficulté : Moyenne (~2 heures)
 ### **Atelier 2 : Choisir notre point de restauration**  
 Aujourd’hui nous restaurobs “le dernier backup”. Nous souhaitons **ajouter la capacité de choisir un point de restauration**.
 
-*..Décrir ici votre procédure de restauration (votre runbook)..*  
-  
+*La première étape va être de lister l'ensemble des backup pour cela il faut créer un pod temporaire qui va nous permettre d'intéragir avec le repertoire de backup :* 
+```bash
+kubectl -n pra run debug-backup \
+  --rm -it \
+  --image=alpine \
+  --overrides='
+{
+  "spec": {
+    "containers": [{
+      "name": "debug",
+      "image": "alpine",
+      "command": ["sh"],
+      "stdin": true,
+      "tty": true,
+      "volumeMounts": [{
+        "name": "backup",
+        "mountPath": "/backup"
+      }]
+    }],
+    "volumes": [{
+      "name": "backup",
+      "persistentVolumeClaim": {
+        "claimName": "pra-backup"
+      }
+    }]
+  }
+}'
+``` 
+*Pour ensuite lister les backups :*
+```bash
+ls -lh /backup
+```
+
+*Mettre les l'application en pause pour éviter que les backup soient corrompues :*
+```bash
+kubectl -n pra scale deployment flask --replicas=0
+```  
+
+*On vient modifier le job de restauration afin de chosir notre backup, donc dans la section "args" on supprime l'ensemble des instruction pour les remplacer par celle de notre choix comme suit :*
+```bash
+cp /backup/nom_du_fichier_choisi.db /data/app.db
+```
+
+*Pour fiunir il est nécessaire de supprimer l'ancien job et appliquer le nouveau*
+```bash
+kubectl -n pra delete job sqlite-restore
+kubectl apply -f pra/50-job-restore.yaml
+```
+
+*Pour finir on relance l'application pour appliquer la sauvegarde*
+```bash
+kubectl -n pra scale deployment flask --replicas=1
+```
+
 ---------------------------------------------------
 Evaluation
 ---------------------------------------------------
