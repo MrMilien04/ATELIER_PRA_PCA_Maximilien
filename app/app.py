@@ -97,7 +97,24 @@ def status():
     n = cur.fetchone()[0]
     conn.close()
 
-    return jsonify(count=n)
+    backup_dir = "/backup"
+    last_backup_file = "None"
+    backup_age_seconds = None
+
+    if os.path.exists(backup_dir):
+        files = [os.path.join(backup_dir, f) for f in os.listdir(backup_dir) if os.path.isfile(os.path.join(backup_dir, f))]
+        if files:
+            latest_file_path = max(files, key=os.path.getmtime)
+            last_backup_file = os.path.basename(latest_file_path)
+
+            mtime = os.path.getmtime(latest_file_path)
+            backup_age_seconds = int(time.time() - mtime)
+
+    return jsonify(
+        count=n,
+        last_backup_file=last_backup_file,
+        backup_age_seconds=backup_age_seconds
+    )
 
 # ---------- Main ----------
 if __name__ == "__main__":
