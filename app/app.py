@@ -88,7 +88,20 @@ def count():
 
     return jsonify(count=n)
 
+@app.get("/status")
+def status():
+    init_db()
+
+    conn = get_conn()
+    cur = conn.execute("SELECT COUNT(*) FROM events")
+    n = cur.fetchone()[0]
+    conn.close()
+
+    return jsonify(count=n)
+
 # ---------- Main ----------
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=8080)
+
+
