@@ -231,27 +231,28 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
-*..Répondez à cet exercice ici..*
+*Dans un cas extrême, si nous perdons le volume de prodution et le volume de sauvegarde c'est à dire **pra-data** et **pra-backup** cela implique une perte de l'ensemble des données. Dans notre cas nous travaillons également en local donc la sauvegarde et la production sont stockés au même endroit. De plus nous sauvegardons toute les minutes donc si la BDD est corrompu dans la minute alors le RPO ne sera pas respecté et il sera nécessaire de restaurer la version antérieure à celle corrompue.*
 
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-*..Répondez à cet exercice ici..*
+*Un Cron job s'active toute les minutes pour copier le volume de production **pra-data** sur le volume de sauvegarde **pra-backup**. Le volume de sauvegarde à été répliqué vers le volume de production afin de simuler un PRA.*
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
   
-*..Répondez à cet exercice ici..*
+*Le RPO est facilement déterminable, en effet celui-ci est caractérisé par le temps qui passe entre deux procédure de sauvegarde donc ici 1 minute.
+Pour ce qui est du RTO c'est à nous de le determiner de façon plus subjective, il faut qu'un humain prenne le contrôle afin de rétablir la sauvegarde manuellement. On pourrait donc la determiner à 5 voir 10 minutes.*
 
 **Exercice 4 :**  
 Pourquoi cette solution (cet atelier) ne peux pas être utilisé dans un vrai environnement de production ? Que manque-t-il ?   
   
-*..Répondez à cet exercice ici..*
+*Utiliser github pour faire de la production n'est pas une bonne idée, c'est bien pour un sandbox. En effet, le stockage est local, la restauration est manuelle il s'agirait de l'automatiser et enfin il manque un monitoring afin de restpecter le RTO.*
   
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-*..Répondez à cet exercice ici..*
+*Pour une architecture dans le cloud, il faudrait privilégier un service tel que AWS RDS ou G Cloud SQL afin de mettre en place de la HA et des backups automatiques. Il faudrait également mettre en place du stockage blob ou S3 pour sauvegarder les données, à l'extérieur du stockage principal. Une implémentation de Prométheus/Grafana pour le monitoring serait pertinent et enfin utiliser du IaC pour reconstruire l'intégralité de l'infrastructure en cas de perte totale du cluster.*
 
 ---------------------------------------------------
 Séquence 6 : Ateliers  
